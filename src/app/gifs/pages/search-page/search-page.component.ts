@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 
 @Component({
   selector: 'app-search-page',
@@ -8,4 +8,8 @@ import { Component } from '@angular/core';
 })
 export default class SearchPageComponent {
 
+
+  onSearch(query: string) {
+    console.log(query);
+  }
 }

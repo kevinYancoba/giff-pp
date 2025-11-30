@@ -8,6 +8,6 @@ import { Component, input } from '@angular/core';
 })
 export class GifListItemComponent {
 
-  urlImage = input.required<string>();
+  urlGif = input.required<string>();
 
 }
