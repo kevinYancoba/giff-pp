@@ -4,12 +4,10 @@ import { GifService } from '../../services/gif-services.service';
 
 @Component({
   selector: 'app-treading-page',
-  imports: [GifListComponent],
+  // imports: [GifListComponent],
   templateUrl: './trending-page.component.html',
   styleUrl: './treading-page.component.css',
 })
 export default class TreadingPageComponent {
   gifService = inject(GifService);
-
-
 }

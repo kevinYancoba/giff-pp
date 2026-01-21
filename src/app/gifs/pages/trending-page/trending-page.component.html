@@ -1,1 +1,14 @@
-<gif-list [gifs]="gifService.trendigGifs()" ></gif-list>
+<!-- <gif-list [gifs]="gifService.trendigGifs()" class="disp"></gif-list> -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  @for (item of gifService.masonryTrendingGifs(); track $index) {
+    <div class="grid gap-4">
+      @for (gif of item; track gif.id) {
+        <img
+          class="h-auto max-w-full rounded-base"
+          src="{{ gif.url }}"
+          alt="{{ gif.title }}"
+        />
+      }
+    </div>
+  }
+</div>

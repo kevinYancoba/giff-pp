@@ -1,0 +1,5 @@
+<h1 class="font-bold mt-4">Gifs relacionados con: {{ query() }}</h1>
+
+<section class="mt-4">
+  <gif-list [gifs]="this.gifsService.searchBykey(query())"></gif-list>
+</section>

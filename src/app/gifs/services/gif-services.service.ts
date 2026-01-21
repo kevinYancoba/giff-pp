@@ -1,10 +1,22 @@
+import { Gif } from './../interfaces/gif.interfaces';
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import {
+  computed,
+  effect,
+  inject,
+  Injectable,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { environment } from '@environments/environment';
 import { GifResponse } from '../interfaces/gif-response.interfaces';
 import { GifMapper } from '../mappers/gif-mapper';
-import { Gif } from '../interfaces/gif.interfaces';
-import { tap } from 'rxjs';
+import { map, tap } from 'rxjs';
+
+const getGifsLocalStorage = () => {
+  const gifs = localStorage.getItem('gifs') ?? '{}';
+  return JSON.parse(gifs);
+};
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +27,29 @@ export class GifService {
   private apiKey = environment.apiKeyGiphy;
 
   public trendigGifs = signal<Gif[]>([]);
+  public searchGifs = signal<Gif[]>([]);
   public loading = signal(true);
+
+  public masonryTrendingGifs = computed<Array<Gif[]>>(() => {
+    const arrayGroup = [];
+    for (let index = 0; index < this.trendigGifs().length; index = index + 3) {
+      const group = this.trendigGifs().slice(index, index + 3);
+
+      arrayGroup.push(group);
+    }
+
+    return arrayGroup;
+  });
+
+  public searchHistory = signal<Record<string, Gif[]>>(getGifsLocalStorage());
+
+  public searchHistoryComputed = computed(() =>
+    Object.keys(this.searchHistory()),
+  );
+
+  saveToLocalStorage = effect(() => {
+    localStorage.setItem('gifs', JSON.stringify(this.searchHistory()));
+  });
 
   constructor() {
     this.loadTrendingGifs();
@@ -34,25 +68,34 @@ export class GifService {
         const gifs = GifMapper.mapGifStructureArrayToGifArray(resp.data);
 
         this.trendigGifs.set(gifs);
-
         this.loading.update((item) => (item = false));
-
-        console.log(this.trendigGifs());
       });
   }
 
-  serchGifs(query: string) {
+  loadSerchGifs(query: string) {
     const endpoint: string = `${this.urlBase}/gifs/search`;
-    this.httpClinet
+    return this.httpClinet
       .get<GifResponse>(endpoint, {
         params: {
           api_key: this.apiKey,
           limit: 20,
           q: query,
         },
-      }).pipe(
+      })
+      .pipe(
+        map((resp) => GifMapper.mapGifStructureArrayToGifArray(resp.data)),
+        tap((gifs) => {
+          this.searchHistory.update((history) => ({
+            ...history,
+            [query.toLowerCase()]: gifs,
+          }));
 
-      )
+          console.log(gifs);
+        }),
+      );
+  }
 
+  searchBykey(query: string): Array<Gif> {
+    return this.searchHistory()[query];
   }
 }
