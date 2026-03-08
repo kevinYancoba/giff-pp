@@ -1,10 +1,15 @@
 <!-- <gif-list [gifs]="gifService.trendigGifs()" class="disp"></gif-list> -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+<div
+  class="h-screen overflow-y-scroll grid grid-cols-2 md:grid-cols-4 gap-4"
+  (scroll)="onScroll($event)"
+  #scrollDiv
+>
   @for (item of gifService.masonryTrendingGifs(); track $index) {
-    <div class="grid gap-4">
+    <div class="flex flex-col gap-4">
       @for (gif of item; track gif.id) {
         <img
-          class="h-auto max-w-full rounded-base"
+          class="w-full rounded-md"
           src="{{ gif.url }}"
           alt="{{ gif.title }}"
         />

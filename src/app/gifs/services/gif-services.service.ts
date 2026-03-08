@@ -28,7 +28,8 @@ export class GifService {
 
   public trendigGifs = signal<Gif[]>([]);
   public searchGifs = signal<Gif[]>([]);
-  public loading = signal(true);
+  public loading = signal(false);
+  private pageGiff = signal(0);
 
   public masonryTrendingGifs = computed<Array<Gif[]>>(() => {
     const arrayGroup = [];
@@ -38,6 +39,7 @@ export class GifService {
       arrayGroup.push(group);
     }
 
+    console.log(arrayGroup);
     return arrayGroup;
   });
 
@@ -56,19 +58,29 @@ export class GifService {
   }
 
   loadTrendingGifs() {
+    console.log('lanza peticion');
+    if (this.loading()) return;
+    console.log('lanza peticion y es haceptada');
+
+    this.loading.set(true);
+
     const endpoint: string = `${this.urlBase}/gifs/trending`;
     this.httpClinet
       .get<GifResponse>(endpoint, {
         params: {
           api_key: this.apiKey,
           limit: 20,
+          offset: this.pageGiff() * 20,
         },
       })
       .subscribe((resp: GifResponse) => {
         const gifs = GifMapper.mapGifStructureArrayToGifArray(resp.data);
 
-        this.trendigGifs.set(gifs);
-        this.loading.update((item) => (item = false));
+        console.log(gifs);
+
+        this.trendigGifs.update((curremtGiff) => [...curremtGiff, ...gifs]);
+        this.pageGiff.update((currentPage) => currentPage+1);
+        this.loading.set(false);
       });
   }
 
